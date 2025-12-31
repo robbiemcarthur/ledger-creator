@@ -17,6 +17,19 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Copy docker-compose to VM
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.ORACLE_CLOUD_HOST }}
+          username: ${{ secrets.ORACLE_CLOUD_USER }}
+          key: ${{ secrets.ORACLE_CLOUD_SSH_KEY }}
+          source: "docker-compose.external-db.yml"
+          target: "/home/ubuntu/creator-ledger/"
+          strip_components: 0
+
       - name: Deploy to Oracle Cloud
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -27,14 +40,39 @@ jobs:
           script: |
             set -e  # Exit on any error
 
-            echo "Starting deployment..."
+            echo "Starting automated deployment..."
 
-            # Change to deployment directory
-            cd /home/ubuntu/creator-ledger || { echo "ERROR: Deployment directory not found!"; exit 1; }
+            # Create deployment directory if it doesn't exist
+            mkdir -p /home/ubuntu/creator-ledger
+            cd /home/ubuntu/creator-ledger
 
-            # Verify required files exist
-            [ -f docker-compose.external-db.yml ] || { echo "ERROR: docker-compose.external-db.yml not found!"; exit 1; }
-            [ -f .env ] || { echo "ERROR: .env file not found!"; exit 1; }
+            # Create .env file from secrets
+            cat > .env << 'ENVFILE'
+            # Spring Profile
+            SPRING_PROFILES_ACTIVE=prod
+
+            # Database Configuration (Neon PostgreSQL)
+            SPRING_DATASOURCE_URL=${{ secrets.NEON_DATABASE_URL }}
+            SPRING_DATASOURCE_USERNAME=${{ secrets.NEON_DATABASE_USERNAME }}
+            SPRING_DATASOURCE_PASSWORD=${{ secrets.NEON_DATABASE_PASSWORD }}
+
+            # Application Configuration
+            APP_PORT=8080
+
+            # Docker Image
+            GITHUB_REPOSITORY=robbiemcarthur/ledger-creator
+            IMAGE_TAG=latest
+            ENVFILE
+
+            echo "✅ Environment file created"
+
+            # Verify docker-compose file exists
+            if [ ! -f docker-compose.external-db.yml ]; then
+              echo "ERROR: docker-compose.external-db.yml not found!"
+              ls -la
+              exit 1
+            fi
+            echo "✅ docker-compose.external-db.yml found"
 
             echo "Logging in to GitHub Container Registry..."
             echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin || { echo "ERROR: Docker login failed!"; exit 1; }
