@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: creator-ledger
+
+logging:
+  level:
+    org.springframework.modulith: INFO

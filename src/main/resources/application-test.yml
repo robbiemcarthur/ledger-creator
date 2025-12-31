@@ -1,0 +1,8 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/creatorledger_test
+    username: creatorledger
+    password: creatorledger
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
