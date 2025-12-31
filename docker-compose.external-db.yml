@@ -1,5 +1,3 @@
-version: '3.8'
-
 # This compose file is for deployments using an external database (e.g., Neon, Supabase)
 # Recommended for Oracle Cloud VM.Standard.E2.1.Micro (1GB RAM)
 
