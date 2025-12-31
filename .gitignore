@@ -39,3 +39,6 @@ logs/
 
 # Test reports
 test-results/
+
+# Environment variables
+.env

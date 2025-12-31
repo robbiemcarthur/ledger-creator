@@ -1,0 +1,41 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# CI/CD
+.github
+
+# Documentation
+*.md
+HELP.md
+
+# IDE
+.idea
+.vscode
+.classpath
+.project
+.settings
+*.iml
+
+# Build artifacts
+build/
+target/
+.gradle/
+
+# Test reports
+test-results/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Docker
+docker-compose*.yml
+Dockerfile
+.dockerignore
