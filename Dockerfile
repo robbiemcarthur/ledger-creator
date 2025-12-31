@@ -9,6 +9,9 @@ COPY gradlew .
 COPY build.gradle .
 COPY settings.gradle .
 
+# Make gradlew executable
+RUN chmod +x gradlew
+
 # Download dependencies (cached layer)
 RUN ./gradlew dependencies --no-daemon
 
