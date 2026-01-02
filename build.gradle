@@ -3,11 +3,21 @@ plugins {
     id 'groovy'
     id 'org.springframework.boot' version '4.0.1'
     id 'io.spring.dependency-management' version '1.1.7'
+    id 'jacoco'
+    id 'com.github.spotbugs' version '6.0.26'
+    id 'org.owasp.dependencycheck' version '11.1.1'
 }
 
 group = 'org.creatorledger'
-version = '0.0.1-SNAPSHOT'
+// Timestamp-based versioning: MAJOR.MINOR.PATCH-YYYYMMDD.HHMMSS
+version = generateVersion()
 description = 'creator-ledger'
+
+def generateVersion() {
+    def baseVersion = '0.1.0'
+    def timestamp = new java.text.SimpleDateFormat('yyyyMMdd.HHmmss').format(new Date())
+    return "${baseVersion}-${timestamp}"
+}
 
 java {
     sourceCompatibility = '21'
@@ -57,3 +67,72 @@ dependencyManagement {
         mavenBom "org.springframework.modulith:spring-modulith-bom:${springModulithVersion}"
     }
 }
+
+// JaCoCo Configuration
+jacoco {
+    toolVersion = '0.8.12'
+}
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.required = true
+        html.required = true
+        csv.required = false
+    }
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: [
+                '**/CreatorLedgerApplication.class'
+            ])
+        }))
+    }
+}
+
+jacocoTestCoverageVerification {
+    dependsOn jacocoTestReport
+    violationRules {
+        rule {
+            limit {
+                minimum = 0.70 // 70% minimum coverage (will increase as we add more tests)
+            }
+        }
+    }
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: [
+                '**/CreatorLedgerApplication.class'
+            ])
+        }))
+    }
+}
+
+// SpotBugs Configuration
+spotbugs {
+    ignoreFailures = false
+    effort = 'max'
+    reportLevel = 'medium'
+    excludeFilter = file('config/spotbugs/exclude.xml')
+}
+
+tasks.withType(com.github.spotbugs.snom.SpotBugsTask).configureEach {
+    reports {
+        html.required = true
+        xml.required = false
+    }
+}
+
+// OWASP Dependency-Check Configuration
+dependencyCheck {
+    format = 'ALL'
+    failBuildOnCVSS = 7.0 // Fail build if high severity vulnerabilities found
+    suppressionFile = 'config/dependency-check/suppressions.xml'
+    analyzers {
+        assemblyEnabled = false
+        nugetconfEnabled = false
+        nodeEnabled = false
+    }
+}
+
+// Add check task dependencies
+check.dependsOn jacocoTestReport, jacocoTestCoverageVerification, spotbugsMain

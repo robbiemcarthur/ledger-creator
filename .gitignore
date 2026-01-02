@@ -46,3 +46,6 @@ test-results/
 
 # SSH keys
 *.pem
+
+# OWASP Dependency-Check data directory
+dependency-check-data/
