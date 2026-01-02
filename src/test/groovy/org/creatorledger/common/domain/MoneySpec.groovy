@@ -1,4 +1,4 @@
-package org.creatorledger.income.domain
+package org.creatorledger.common.domain
 
 import spock.lang.Specification
 import java.math.BigDecimal

@@ -36,7 +36,6 @@ ext {
 }
 
 dependencies {
-    // Force Groovy 4.0.x for Spock compatibility
     implementation "org.apache.groovy:groovy:${groovyVersion}"
     testImplementation "org.apache.groovy:groovy:${groovyVersion}"
 

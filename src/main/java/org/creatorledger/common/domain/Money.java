@@ -1,4 +1,4 @@
-package org.creatorledger.income.domain;
+package org.creatorledger.common.domain;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
