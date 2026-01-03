@@ -1,8 +1,9 @@
 package org.creatorledger.user.application;
 
+import org.creatorledger.common.UserId;
 import org.creatorledger.user.domain.Email;
 import org.creatorledger.user.domain.User;
-import org.creatorledger.common.UserId;
+import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
@@ -14,6 +15,7 @@ import java.util.Optional;
  * and queries from the presentation layer.
  * </p>
  */
+@Service
 public class UserApplicationService {
 
     private final UserRepository userRepository;

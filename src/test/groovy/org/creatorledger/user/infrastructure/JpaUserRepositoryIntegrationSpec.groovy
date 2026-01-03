@@ -1,12 +1,11 @@
 package org.creatorledger.user.infrastructure
 
+import org.creatorledger.common.UserId
 import org.creatorledger.user.domain.Email
 import org.creatorledger.user.domain.User
-import org.creatorledger.common.UserId
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.DynamicPropertyRegistry
-import org.springframework.test.context.DynamicPropertySource
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection
 import org.springframework.transaction.annotation.Transactional
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.spock.Testcontainers
@@ -19,17 +18,11 @@ import spock.lang.Specification
 class JpaUserRepositoryIntegrationSpec extends Specification {
 
     @Shared
+    @ServiceConnection
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine")
             .withDatabaseName("testdb")
             .withUsername("test")
             .withPassword("test")
-
-    @DynamicPropertySource
-    static void setProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", () -> postgres.getJdbcUrl())
-        registry.add("spring.datasource.username", () -> postgres.getUsername())
-        registry.add("spring.datasource.password", () -> postgres.getPassword())
-    }
 
     @Autowired
     JpaUserRepository repository
