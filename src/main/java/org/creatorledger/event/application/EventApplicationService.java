@@ -4,6 +4,7 @@ import org.creatorledger.event.api.EventId;
 import org.creatorledger.event.domain.ClientName;
 import org.creatorledger.event.domain.Event;
 import org.creatorledger.event.domain.EventDate;
+import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
@@ -14,10 +15,8 @@ import java.util.Optional;
  * to persist changes. It serves as the entry point for event-related commands
  * and queries from the presentation layer.
  * </p>
- * <p>
- * Note: @Service annotation will be added when infrastructure layer is implemented.
- * </p>
  */
+@Service
 public class EventApplicationService {
 
     private final EventRepository eventRepository;
