@@ -1,4 +1,4 @@
-package org.creatorledger.common
+package org.creatorledger.income.api
 
 import spock.lang.Specification
 

@@ -1,6 +1,6 @@
 package org.creatorledger.event.domain;
 
-import org.creatorledger.common.EventId;
+import org.creatorledger.event.api.EventId;
 
 import java.time.Instant;
 

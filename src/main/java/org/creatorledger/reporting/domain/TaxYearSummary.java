@@ -1,8 +1,8 @@
 package org.creatorledger.reporting.domain;
 
 import org.creatorledger.common.Money;
-import org.creatorledger.common.TaxYearSummaryId;
-import org.creatorledger.common.UserId;
+import org.creatorledger.reporting.api.TaxYearSummaryId;
+import org.creatorledger.user.api.UserId;
 
 /**
  * Aggregate root representing a tax year summary for a user.

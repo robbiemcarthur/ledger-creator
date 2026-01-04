@@ -1,4 +1,4 @@
-package org.creatorledger.common;
+package org.creatorledger.event.api;
 
 import java.util.UUID;
 

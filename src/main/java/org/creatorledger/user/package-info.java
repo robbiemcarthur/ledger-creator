@@ -5,14 +5,14 @@
  * for multi-tenancy across all other modules.
  * </p>
  * <p>
- * <strong>Dependencies:</strong>
+ * <strong>Public API:</strong> The {@code api} package contains {@code UserId}
+ * which other modules can safely depend on.
  * </p>
- * <ul>
- *   <li>{@code common} - shared kernel (UserId)</li>
- * </ul>
+ * <p>
+ * <strong>Dependencies:</strong> None - this is a foundation module.
+ * </p>
  */
 @org.springframework.modulith.ApplicationModule(
-    displayName = "User",
-    allowedDependencies = {"common"}
+    displayName = "User"
 )
 package org.creatorledger.user;

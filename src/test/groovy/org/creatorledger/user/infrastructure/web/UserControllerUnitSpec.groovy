@@ -3,7 +3,7 @@ package org.creatorledger.user.infrastructure.web
 import org.creatorledger.user.application.UserApplicationService
 import org.creatorledger.user.domain.Email
 import org.creatorledger.user.domain.User
-import org.creatorledger.common.UserId
+import org.creatorledger.user.api.UserId
 import org.springframework.http.HttpStatus
 import spock.lang.Specification
 

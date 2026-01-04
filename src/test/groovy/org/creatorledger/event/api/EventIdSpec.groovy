@@ -1,4 +1,4 @@
-package org.creatorledger.common
+package org.creatorledger.event.api
 
 import spock.lang.Specification
 

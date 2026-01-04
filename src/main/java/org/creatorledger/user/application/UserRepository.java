@@ -1,7 +1,7 @@
 package org.creatorledger.user.application;
 
 import org.creatorledger.user.domain.User;
-import org.creatorledger.common.UserId;
+import org.creatorledger.user.api.UserId;
 
 import java.util.Optional;
 

@@ -5,14 +5,18 @@
  * and other engagements for creatives.
  * </p>
  * <p>
+ * <strong>Public API:</strong> The {@code api} package contains {@code EventId}
+ * which other modules can safely depend on.
+ * </p>
+ * <p>
  * <strong>Dependencies:</strong>
  * </p>
  * <ul>
- *   <li>{@code common} - shared kernel (EventId, UserId)</li>
+ *   <li>{@code user::api} - UserId for event ownership</li>
  * </ul>
  */
 @org.springframework.modulith.ApplicationModule(
     displayName = "Event",
-    allowedDependencies = {"common"}
+    allowedDependencies = {"user :: api"}
 )
 package org.creatorledger.event;

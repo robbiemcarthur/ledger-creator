@@ -1,9 +1,9 @@
 package org.creatorledger.income.domain
 
-import org.creatorledger.common.EventId
-import org.creatorledger.common.IncomeId
+import org.creatorledger.event.api.EventId
+import org.creatorledger.income.api.IncomeId
 import org.creatorledger.common.Money
-import org.creatorledger.common.UserId
+import org.creatorledger.user.api.UserId
 import spock.lang.Specification
 import java.time.Instant
 import java.time.LocalDate

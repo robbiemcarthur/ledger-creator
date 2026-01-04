@@ -1,6 +1,6 @@
 package org.creatorledger.user.domain;
 
-import org.creatorledger.common.UserId;
+import org.creatorledger.user.api.UserId;
 
 /**
  * Aggregate root representing a user in the system.

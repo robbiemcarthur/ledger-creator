@@ -2,7 +2,7 @@ package org.creatorledger.user.infrastructure
 
 import org.creatorledger.user.domain.Email
 import org.creatorledger.user.domain.User
-import org.creatorledger.common.UserId
+import org.creatorledger.user.api.UserId
 import spock.lang.Specification
 
 class UserEntityMapperSpec extends Specification {

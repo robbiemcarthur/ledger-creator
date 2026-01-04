@@ -5,15 +5,20 @@
  * UK tax year summaries for self-employed creatives.
  * </p>
  * <p>
+ * <strong>Public API:</strong> The {@code api} package contains {@code TaxYearSummaryId}
+ * which other modules can safely depend on.
+ * </p>
+ * <p>
  * <strong>Dependencies:</strong>
  * </p>
  * <ul>
- *   <li>{@code common} - shared kernel (Money, IDs)</li>
+ *   <li>{@code common} - Money value object</li>
+ *   <li>{@code user::api} - UserId for report ownership</li>
  *   <li>{@code expense::api} - ExpenseCategory for categorization</li>
  * </ul>
  */
 @org.springframework.modulith.ApplicationModule(
     displayName = "Reporting",
-    allowedDependencies = {"common", "expense :: api"}
+    allowedDependencies = {"common", "user :: api", "expense :: api"}
 )
 package org.creatorledger.reporting;
