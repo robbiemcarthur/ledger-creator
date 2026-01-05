@@ -1,0 +1,155 @@
+package org.creatorledger.reporting.application
+
+import org.creatorledger.common.Money
+import org.creatorledger.event.api.EventId
+import org.creatorledger.expense.api.ExpenseCategory
+import org.creatorledger.expense.application.ExpenseRepository
+import org.creatorledger.expense.domain.Expense
+import org.creatorledger.income.application.IncomeRepository
+import org.creatorledger.income.domain.Income
+import org.creatorledger.reporting.domain.TaxYear
+import org.creatorledger.user.api.UserId
+import spock.lang.Specification
+
+import java.time.LocalDate
+
+class TaxYearSummaryApplicationServiceSpec extends Specification {
+
+    IncomeRepository incomeRepository
+    ExpenseRepository expenseRepository
+    TaxYearSummaryRepository taxYearSummaryRepository
+    TaxYearSummaryApplicationService service
+
+    def setup() {
+        incomeRepository = Mock(IncomeRepository)
+        expenseRepository = Mock(ExpenseRepository)
+        taxYearSummaryRepository = Mock(TaxYearSummaryRepository)
+        service = new TaxYearSummaryApplicationService(
+                incomeRepository,
+                expenseRepository,
+                taxYearSummaryRepository
+        )
+    }
+
+    def "should generate tax year summary with income and expenses"() {
+        given: "a user and tax year"
+        def userId = UserId.generate()
+        def taxYear = TaxYear.of(2025)
+        def command = new GenerateTaxYearSummaryCommand(userId, taxYear)
+
+        and: "some income for the tax year"
+        def income1 = Income.record(userId, EventId.generate(), Money.gbp("1000.00"), "Project 1", LocalDate.of(2025, 5, 1))
+        def income2 = Income.record(userId, EventId.generate(), Money.gbp("1500.00"), "Project 2", LocalDate.of(2025, 7, 15))
+        incomeRepository.findByUserIdAndDateRange(userId, taxYear.startDate(), taxYear.endDate()) >> [income1, income2]
+
+        and: "some expenses for the tax year"
+        def expense1 = Expense.record(userId, Money.gbp("300.00"), ExpenseCategory.EQUIPMENT, "Laptop", LocalDate.of(2025, 6, 1))
+        def expense2 = Expense.record(userId, Money.gbp("200.00"), ExpenseCategory.SOFTWARE, "Software license", LocalDate.of(2025, 8, 1))
+        expenseRepository.findByUserIdAndDateRange(userId, taxYear.startDate(), taxYear.endDate()) >> [expense1, expense2]
+
+        when: "generating the summary"
+        def summaryId = service.generate(command)
+
+        then: "the summary is saved with correct totals"
+        1 * taxYearSummaryRepository.save(_) >> { args ->
+            def summary = args[0]
+            assert summary.userId() == userId
+            assert summary.taxYear() == taxYear
+            assert summary.totalIncome() == Money.gbp("2500.00")
+            assert summary.totalExpenses() == Money.gbp("500.00")
+            assert summary.profit() == Money.gbp("2000.00")
+            assert summary.categoryTotals().totalFor(ExpenseCategory.EQUIPMENT) == Money.gbp("300.00")
+            assert summary.categoryTotals().totalFor(ExpenseCategory.SOFTWARE) == Money.gbp("200.00")
+            return summary
+        }
+        summaryId != null
+    }
+
+    def "should generate summary with zero income"() {
+        given: "a user and tax year with no income"
+        def userId = UserId.generate()
+        def taxYear = TaxYear.of(2025)
+        def command = new GenerateTaxYearSummaryCommand(userId, taxYear)
+
+        incomeRepository.findByUserIdAndDateRange(_, _, _) >> []
+
+        and: "some expenses"
+        def expense = Expense.record(userId, Money.gbp("100.00"), ExpenseCategory.EQUIPMENT, "Item", LocalDate.of(2025, 6, 1))
+        expenseRepository.findByUserIdAndDateRange(_, _, _) >> [expense]
+
+        when: "generating the summary"
+        service.generate(command)
+
+        then: "total income is zero"
+        1 * taxYearSummaryRepository.save(_) >> { args ->
+            def summary = args[0]
+            assert summary.totalIncome() == Money.gbp("0.00")
+            assert summary.totalExpenses() == Money.gbp("100.00")
+            return summary
+        }
+    }
+
+    def "should generate summary with zero expenses"() {
+        given: "a user and tax year with no expenses"
+        def userId = UserId.generate()
+        def taxYear = TaxYear.of(2025)
+        def command = new GenerateTaxYearSummaryCommand(userId, taxYear)
+
+        and: "some income"
+        def income = Income.record(userId, EventId.generate(), Money.gbp("1000.00"), "Project", LocalDate.of(2025, 5, 1))
+        incomeRepository.findByUserIdAndDateRange(_, _, _) >> [income]
+
+        expenseRepository.findByUserIdAndDateRange(_, _, _) >> []
+
+        when: "generating the summary"
+        service.generate(command)
+
+        then: "total expenses is zero"
+        1 * taxYearSummaryRepository.save(_) >> { args ->
+            def summary = args[0]
+            assert summary.totalIncome() == Money.gbp("1000.00")
+            assert summary.totalExpenses() == Money.gbp("0.00")
+            assert summary.categoryTotals().isEmpty()
+            return summary
+        }
+    }
+
+    def "should reject null command"() {
+        when: "generating with null command"
+        service.generate(null)
+
+        then: "it should throw IllegalArgumentException"
+        def exception = thrown(IllegalArgumentException)
+        exception.message == "Command cannot be null"
+    }
+
+    def "should find summary by ID"() {
+        given: "an existing summary"
+        def summaryId = org.creatorledger.reporting.api.TaxYearSummaryId.generate()
+        def summary = org.creatorledger.reporting.domain.TaxYearSummary.generate(
+                summaryId,
+                UserId.generate(),
+                TaxYear.of(2025),
+                Money.gbp("2000.00"),
+                Money.gbp("500.00"),
+                org.creatorledger.reporting.domain.CategoryTotals.empty()
+        )
+
+        when: "finding by ID"
+        def result = service.findById(summaryId)
+
+        then: "the repository is queried"
+        1 * taxYearSummaryRepository.findById(summaryId) >> Optional.of(summary)
+        result.isPresent()
+        result.get() == summary
+    }
+
+    def "should reject null ID when finding"() {
+        when: "finding with null ID"
+        service.findById(null)
+
+        then: "it should throw IllegalArgumentException"
+        def exception = thrown(IllegalArgumentException)
+        exception.message == "Tax year summary ID cannot be null"
+    }
+}

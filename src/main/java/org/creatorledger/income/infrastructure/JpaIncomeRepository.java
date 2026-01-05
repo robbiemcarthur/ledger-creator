@@ -3,8 +3,11 @@ package org.creatorledger.income.infrastructure;
 import org.creatorledger.income.application.IncomeRepository;
 import org.creatorledger.income.domain.Income;
 import org.creatorledger.income.api.IncomeId;
+import org.creatorledger.user.api.UserId;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -45,5 +48,17 @@ public class JpaIncomeRepository implements IncomeRepository {
     @Override
     public void delete(final Income income) {
         springDataRepository.deleteById(income.id().value());
+    }
+
+    @Override
+    public List<Income> findByUserIdAndDateRange(final UserId userId, final LocalDate startDate, final LocalDate endDate) {
+        return springDataRepository.findByUserIdAndReceivedDateBetween(
+                        userId.value(),
+                        startDate,
+                        endDate
+                )
+                .stream()
+                .map(IncomeEntityMapper::toDomain)
+                .toList();
     }
 }
