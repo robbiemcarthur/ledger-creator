@@ -9,7 +9,6 @@ plugins {
 }
 
 group = 'org.creatorledger'
-// Timestamp-based versioning: MAJOR.MINOR.PATCH-YYYYMMDD.HHMMSS
 version = generateVersion()
 description = 'creator-ledger'
 
@@ -71,7 +70,6 @@ dependencyManagement {
     }
 }
 
-// JaCoCo Configuration
 jacoco {
     toolVersion = '0.8.12'
 }
@@ -97,7 +95,7 @@ jacocoTestCoverageVerification {
     violationRules {
         rule {
             limit {
-                minimum = 0.70 // 70% minimum coverage (will increase as we add more tests)
+                minimum = 0.70
             }
         }
     }
@@ -110,7 +108,6 @@ jacocoTestCoverageVerification {
     }
 }
 
-// SpotBugs Configuration
 spotbugs {
     ignoreFailures = false
     effort = 'max'
@@ -130,10 +127,9 @@ tasks.named('spotbugsTest') {
     enabled = false
 }
 
-// OWASP Dependency-Check Configuration
 dependencyCheck {
     format = 'ALL'
-    failBuildOnCVSS = 7.0 // Fail build if high severity vulnerabilities found
+    failBuildOnCVSS = 7.0
     suppressionFile = 'config/dependency-check/suppressions.xml'
     analyzers {
         assemblyEnabled = false
@@ -142,5 +138,4 @@ dependencyCheck {
     }
 }
 
-// Add check task dependencies
 check.dependsOn jacocoTestReport, jacocoTestCoverageVerification, spotbugsMain

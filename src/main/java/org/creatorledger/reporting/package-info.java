@@ -14,11 +14,12 @@
  * <ul>
  *   <li>{@code common} - Money value object</li>
  *   <li>{@code user::api} - UserId for report ownership</li>
- *   <li>{@code expense::api} - ExpenseCategory for categorization</li>
+ *   <li>{@code income::api} - IncomeQueryService for aggregation</li>
+ *   <li>{@code expense::api} - ExpenseQueryService and ExpenseCategory</li>
  * </ul>
  */
 @org.springframework.modulith.ApplicationModule(
     displayName = "Reporting",
-    allowedDependencies = {"common", "user :: api", "expense :: api"}
+    allowedDependencies = {"common", "user :: api", "income :: api", "expense :: api"}
 )
 package org.creatorledger.reporting;

@@ -3,9 +3,11 @@ package org.creatorledger.reporting.application
 import org.creatorledger.common.Money
 import org.creatorledger.event.api.EventId
 import org.creatorledger.expense.api.ExpenseCategory
-import org.creatorledger.expense.application.ExpenseRepository
+import org.creatorledger.expense.api.ExpenseData
+import org.creatorledger.expense.api.ExpenseQueryService
 import org.creatorledger.expense.domain.Expense
-import org.creatorledger.income.application.IncomeRepository
+import org.creatorledger.income.api.IncomeData
+import org.creatorledger.income.api.IncomeQueryService
 import org.creatorledger.income.domain.Income
 import org.creatorledger.reporting.domain.TaxYear
 import org.creatorledger.user.api.UserId
@@ -15,18 +17,18 @@ import java.time.LocalDate
 
 class TaxYearSummaryApplicationServiceSpec extends Specification {
 
-    IncomeRepository incomeRepository
-    ExpenseRepository expenseRepository
+    IncomeQueryService incomeQueryService
+    ExpenseQueryService expenseQueryService
     TaxYearSummaryRepository taxYearSummaryRepository
     TaxYearSummaryApplicationService service
 
     def setup() {
-        incomeRepository = Mock(IncomeRepository)
-        expenseRepository = Mock(ExpenseRepository)
+        incomeQueryService = Mock(IncomeQueryService)
+        expenseQueryService = Mock(ExpenseQueryService)
         taxYearSummaryRepository = Mock(TaxYearSummaryRepository)
         service = new TaxYearSummaryApplicationService(
-                incomeRepository,
-                expenseRepository,
+                incomeQueryService,
+                expenseQueryService,
                 taxYearSummaryRepository
         )
     }
@@ -38,14 +40,14 @@ class TaxYearSummaryApplicationServiceSpec extends Specification {
         def command = new GenerateTaxYearSummaryCommand(userId, taxYear)
 
         and: "some income for the tax year"
-        def income1 = Income.record(userId, EventId.generate(), Money.gbp("1000.00"), "Project 1", LocalDate.of(2025, 5, 1))
-        def income2 = Income.record(userId, EventId.generate(), Money.gbp("1500.00"), "Project 2", LocalDate.of(2025, 7, 15))
-        incomeRepository.findByUserIdAndDateRange(userId, taxYear.startDate(), taxYear.endDate()) >> [income1, income2]
+        def income1 = IncomeData.from(Income.record(userId, EventId.generate(), Money.gbp("1000.00"), "Project 1", LocalDate.of(2025, 5, 1)))
+        def income2 = IncomeData.from(Income.record(userId, EventId.generate(), Money.gbp("1500.00"), "Project 2", LocalDate.of(2025, 7, 15)))
+        incomeQueryService.findByUserIdAndDateRange(userId, taxYear.startDate(), taxYear.endDate()) >> [income1, income2]
 
         and: "some expenses for the tax year"
-        def expense1 = Expense.record(userId, Money.gbp("300.00"), ExpenseCategory.EQUIPMENT, "Laptop", LocalDate.of(2025, 6, 1))
-        def expense2 = Expense.record(userId, Money.gbp("200.00"), ExpenseCategory.SOFTWARE, "Software license", LocalDate.of(2025, 8, 1))
-        expenseRepository.findByUserIdAndDateRange(userId, taxYear.startDate(), taxYear.endDate()) >> [expense1, expense2]
+        def expense1 = ExpenseData.from(Expense.record(userId, Money.gbp("300.00"), ExpenseCategory.EQUIPMENT, "Laptop", LocalDate.of(2025, 6, 1)))
+        def expense2 = ExpenseData.from(Expense.record(userId, Money.gbp("200.00"), ExpenseCategory.SOFTWARE, "Software license", LocalDate.of(2025, 8, 1)))
+        expenseQueryService.findByUserIdAndDateRange(userId, taxYear.startDate(), taxYear.endDate()) >> [expense1, expense2]
 
         when: "generating the summary"
         def summaryId = service.generate(command)
@@ -71,11 +73,11 @@ class TaxYearSummaryApplicationServiceSpec extends Specification {
         def taxYear = TaxYear.of(2025)
         def command = new GenerateTaxYearSummaryCommand(userId, taxYear)
 
-        incomeRepository.findByUserIdAndDateRange(_, _, _) >> []
+        incomeQueryService.findByUserIdAndDateRange(_, _, _) >> []
 
         and: "some expenses"
-        def expense = Expense.record(userId, Money.gbp("100.00"), ExpenseCategory.EQUIPMENT, "Item", LocalDate.of(2025, 6, 1))
-        expenseRepository.findByUserIdAndDateRange(_, _, _) >> [expense]
+        def expense = ExpenseData.from(Expense.record(userId, Money.gbp("100.00"), ExpenseCategory.EQUIPMENT, "Item", LocalDate.of(2025, 6, 1)))
+        expenseQueryService.findByUserIdAndDateRange(_, _, _) >> [expense]
 
         when: "generating the summary"
         service.generate(command)
@@ -96,10 +98,10 @@ class TaxYearSummaryApplicationServiceSpec extends Specification {
         def command = new GenerateTaxYearSummaryCommand(userId, taxYear)
 
         and: "some income"
-        def income = Income.record(userId, EventId.generate(), Money.gbp("1000.00"), "Project", LocalDate.of(2025, 5, 1))
-        incomeRepository.findByUserIdAndDateRange(_, _, _) >> [income]
+        def income = IncomeData.from(Income.record(userId, EventId.generate(), Money.gbp("1000.00"), "Project", LocalDate.of(2025, 5, 1)))
+        incomeQueryService.findByUserIdAndDateRange(_, _, _) >> [income]
 
-        expenseRepository.findByUserIdAndDateRange(_, _, _) >> []
+        expenseQueryService.findByUserIdAndDateRange(_, _, _) >> []
 
         when: "generating the summary"
         service.generate(command)

@@ -2,10 +2,10 @@ package org.creatorledger.reporting.application;
 
 import org.creatorledger.common.Money;
 import org.creatorledger.expense.api.ExpenseCategory;
-import org.creatorledger.expense.application.ExpenseRepository;
-import org.creatorledger.expense.domain.Expense;
-import org.creatorledger.income.application.IncomeRepository;
-import org.creatorledger.income.domain.Income;
+import org.creatorledger.expense.api.ExpenseData;
+import org.creatorledger.expense.api.ExpenseQueryService;
+import org.creatorledger.income.api.IncomeData;
+import org.creatorledger.income.api.IncomeQueryService;
 import org.creatorledger.reporting.api.TaxYearSummaryId;
 import org.creatorledger.reporting.domain.CategoryTotals;
 import org.creatorledger.reporting.domain.TaxYearSummary;
@@ -19,17 +19,17 @@ import java.util.Optional;
 @Service
 public class TaxYearSummaryApplicationService {
 
-    private final IncomeRepository incomeRepository;
-    private final ExpenseRepository expenseRepository;
+    private final IncomeQueryService incomeQueryService;
+    private final ExpenseQueryService expenseQueryService;
     private final TaxYearSummaryRepository taxYearSummaryRepository;
 
     public TaxYearSummaryApplicationService(
-            final IncomeRepository incomeRepository,
-            final ExpenseRepository expenseRepository,
+            final IncomeQueryService incomeQueryService,
+            final ExpenseQueryService expenseQueryService,
             final TaxYearSummaryRepository taxYearSummaryRepository
     ) {
-        this.incomeRepository = incomeRepository;
-        this.expenseRepository = expenseRepository;
+        this.incomeQueryService = incomeQueryService;
+        this.expenseQueryService = expenseQueryService;
         this.taxYearSummaryRepository = taxYearSummaryRepository;
     }
 
@@ -38,13 +38,13 @@ public class TaxYearSummaryApplicationService {
             throw new IllegalArgumentException("Command cannot be null");
         }
 
-        final List<Income> incomes = incomeRepository.findByUserIdAndDateRange(
+        final List<IncomeData> incomes = incomeQueryService.findByUserIdAndDateRange(
                 command.userId(),
                 command.taxYear().startDate(),
                 command.taxYear().endDate()
         );
 
-        final List<Expense> expenses = expenseRepository.findByUserIdAndDateRange(
+        final List<ExpenseData> expenses = expenseQueryService.findByUserIdAndDateRange(
                 command.userId(),
                 command.taxYear().startDate(),
                 command.taxYear().endDate()
@@ -73,25 +73,25 @@ public class TaxYearSummaryApplicationService {
         return taxYearSummaryRepository.findById(id);
     }
 
-    private Money calculateTotalIncome(final List<Income> incomes) {
+    private Money calculateTotalIncome(final List<IncomeData> incomes) {
         return incomes.stream()
-                .map(Income::amount)
+                .map(IncomeData::amount)
                 .reduce(Money.gbp("0.00"), Money::add);
     }
 
-    private Money calculateTotalExpenses(final List<Expense> expenses) {
+    private Money calculateTotalExpenses(final List<ExpenseData> expenses) {
         return expenses.stream()
-                .map(Expense::amount)
+                .map(ExpenseData::amount)
                 .reduce(Money.gbp("0.00"), Money::add);
     }
 
-    private CategoryTotals calculateCategoryTotals(final List<Expense> expenses) {
+    private CategoryTotals calculateCategoryTotals(final List<ExpenseData> expenses) {
         if (expenses.isEmpty()) {
             return CategoryTotals.empty();
         }
 
         final Map<ExpenseCategory, Money> totals = new HashMap<>();
-        for (final Expense expense : expenses) {
+        for (final ExpenseData expense : expenses) {
             final ExpenseCategory category = expense.category();
             final Money currentTotal = totals.getOrDefault(category, Money.gbp("0.00"));
             totals.put(category, currentTotal.add(expense.amount()));
