@@ -13,14 +13,6 @@ public record UserRegistered(
     Email email,
     Instant occurredAt
 ) {
-
-    /**
-     * Creates a UserRegistered event with the current timestamp.
-     *
-     * @param userId the ID of the registered user
-     * @param email the email of the registered user
-     * @return a new UserRegistered event
-     */
     public static UserRegistered of(UserId userId, Email email) {
         return new UserRegistered(userId, email, Instant.now());
     }

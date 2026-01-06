@@ -11,11 +11,6 @@ package org.creatorledger.user.application;
  */
 public record RegisterUserCommand(String email) {
 
-    /**
-     * Creates a new RegisterUserCommand.
-     *
-     * @throws IllegalArgumentException if email is null or blank
-     */
     public RegisterUserCommand {
         if (email == null || email.isBlank()) {
             throw new IllegalArgumentException("Email cannot be null or blank");

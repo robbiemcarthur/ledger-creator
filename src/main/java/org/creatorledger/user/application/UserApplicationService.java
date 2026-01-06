@@ -27,14 +27,7 @@ public class UserApplicationService {
         this.userRepository = userRepository;
     }
 
-    /**
-     * Registers a new user in the system.
-     *
-     * @param command the registration command containing user details
-     * @return the ID of the newly registered user
-     * @throws IllegalArgumentException if command is null
-     */
-    public UserId register(RegisterUserCommand command) {
+    public UserId register(final RegisterUserCommand command) {
         if (command == null) {
             throw new IllegalArgumentException("Command cannot be null");
         }
@@ -47,28 +40,14 @@ public class UserApplicationService {
         return user.id();
     }
 
-    /**
-     * Finds a user by their unique identifier.
-     *
-     * @param userId the user ID
-     * @return an Optional containing the user if found, empty otherwise
-     * @throws IllegalArgumentException if userId is null
-     */
-    public Optional<User> findById(UserId userId) {
+    public Optional<User> findById(final UserId userId) {
         if (userId == null) {
             throw new IllegalArgumentException("User ID cannot be null");
         }
         return userRepository.findById(userId);
     }
 
-    /**
-     * Checks if a user exists with the given ID.
-     *
-     * @param userId the user ID
-     * @return true if a user exists, false otherwise
-     * @throws IllegalArgumentException if userId is null
-     */
-    public boolean existsById(UserId userId) {
+    public boolean existsById(final UserId userId) {
         if (userId == null) {
             throw new IllegalArgumentException("User ID cannot be null");
         }
